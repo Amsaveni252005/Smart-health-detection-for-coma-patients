@@ -1,0 +1,54 @@
+// GPS VALUE
+//*****************************************************
+void Receive_GPS_Data()
+{
+  
+while(finish==0){
+while(Serial.available()>0)
+{
+  Gpsdata = Serial.read();
+flg = 1;
+if( Gpsdata=='$' && pos_cnt == 0)   // finding GPRMC header
+pos_cnt=1;
+if( Gpsdata=='G' && pos_cnt == 1)
+pos_cnt=2;
+if( Gpsdata=='P' && pos_cnt == 2)
+pos_cnt=3;
+if( Gpsdata=='R' && pos_cnt == 3)
+pos_cnt=4;
+if( Gpsdata=='M' && pos_cnt == 4)
+pos_cnt=5;
+if( Gpsdata=='C' && pos_cnt==5 )
+pos_cnt=6;
+if(pos_cnt==6 &&  Gpsdata ==','){   // count commas in message
+com_cnt++;
+flg=0;
+}
+
+if(com_cnt==3 && flg==1){
+if(lat_cnt<10)
+{
+lat[lat_cnt++] =  Gpsdata;  
+}// latitude
+flg=0;
+}
+
+if(com_cnt==5 && flg==1){
+if(log_cnt<12)
+{
+lg[log_cnt++] =  Gpsdata;         // Longitude
+
+}
+flg=0;
+}
+
+if( Gpsdata == '*' && com_cnt >= 5){
+com_cnt = 0;                      // end of GPRMC message
+lat_cnt = 0;
+log_cnt = 0;
+flg     = 0;
+finish  = 1;
+}
+}
+}
+}

@@ -1,0 +1,137 @@
+#include <Wire.h>
+#include "MAX30100_PulseOximeter.h"
+
+#define REPORTING_PERIOD_MS     1000
+
+// Create a PulseOximeter object
+PulseOximeter pox;
+int t=0,B,A1=0,A2=0;
+int S=0,H;
+int count0=0,count1=0,hb,spo2;
+int C=1,D=1,E=0,F=0;
+#define buzzer D5
+
+
+
+
+uint32_t tsLastReport = 0;
+
+// Callback routine is executed when a pulse is detected
+void onBeatDetected() 
+{
+    Serial.println("Beat!");
+}
+
+void setup() {
+   // initialize LCD
+   pinMode(A0,INPUT);
+   
+  lcd.begin();
+  // turn on LCD backlight                      
+  lcd.backlight();
+  pinMode(buzzer,OUTPUT);
+    Serial.begin(9600);
+    Blynk.begin(BLYNK_AUTH_TOKEN, ssid, password);
+   WiFi.begin(ssid , password);
+  
+    
+   
+
+    Serial.print("Initializing pulse oximeter..");
+
+    // Initialize sensor
+    if (!pox.begin()) {
+        Serial.println("FAILED");
+        for(;;);
+    } else {
+        Serial.println("SUCCESS");
+    }
+
+  // Configure sensor to use 7.6mA for LED drive
+  pox.setIRLedCurrent(MAX30100_LED_CURR_7_6MA);
+
+    // Register a callback routine
+    pox.setOnBeatDetectedCallback(onBeatDetected);
+
+
+if (!mpu.begin()) {
+    Serial.println("Failed to find MPU6050 chip");
+    while (1) {
+      delay(10);
+    }
+  }
+  Serial.println("MPU6050 Found!");
+ 
+  // set accelerometer range to +-8G
+  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+ 
+  // set gyro range to +- 500 deg/s
+  mpu.setGyroRange(MPU6050_RANGE_500_DEG);
+ 
+  // set filter bandwidth to 21 Hz
+  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+ 
+  // Add a delay for stability
+  delay(100);
+
+}
+
+void loop()
+{
+  if ( count<10)
+  { 
+    // Read from the sensor
+    pox.update();
+
+    // Grab the updated heart rate and SpO2 levels
+    if (millis() - tsLastReport > REPORTING_PERIOD_MS) {
+        Serial.print("Heart rate:");
+        Serial.print(pox.getHeartRate());
+        Serial.print("SpO2:");
+        Serial.print(pox.getSpO2());
+        Serial.println("%");
+       S=(pox.getSpO2());
+        H=(pox.getHeartRate());
+         tsLastReport = millis(); // cayenne virtualWrite(1, pox.getHeartRate())
+       count0++;
+    }
+  }
+  if(count0>=5)
+  {
+    temp=analogRead(A0)/2.85;
+    count0=0;
+Blynk.virtualWrite(V3, temp);
+     Blynk.virtualWrite(V0, H);
+     Blynk.virtualWrite(V1, S);
+// Get new sensor events with the readings
+  sensors_event_t a, g, temp;
+  mpu.getEvent(&a, &g, &temp);
+ 
+  // Print out the acceleration readings in m/s^2
+  Serial.print("Acceleration:   X:");
+  Serial.print(a.acceleration.x);
+ // Serial.print(", Y:");
+  //Serial.print(a.acceleration.y);
+  //Serial.print(", Z:");
+ // Serial.print(a.acceleration.z);
+  //Serial.println(" (m/s^2)");
+ Blynk.virtualWrite(V2, a.acceleration.x);
+if(a.acceleration.x>=8)
+{
+  digitalWrite(buzzer,HIGH);
+  delay(3000);
+  digitalWrite(buzzer,LOW);
+}
+     if (!pox.begin())
+      {
+        Serial.println("FAILED");
+        for(;;);
+    } 
+    else
+     {
+        Serial.println("SUCCESS");
+    }
+
+    pox.setOnBeatDetectedCallback(onBeatDetected);
+  }
+}

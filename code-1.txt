@@ -1,0 +1,53 @@
+/ IOT CODING
+
+#define BLYNK_TEMPLATE_ID "TMPL3bOlr-Ae5"
+#define BLYNK_TEMPLATE_NAME "health"
+#define BLYNK_AUTH_TOKEN "x6K6FhupIvezGbOBIHD36jeMUpckl7hC"
+
+#define BLYNK_PRINT Serial
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+//dafok28235@bitfami.com
+//Galwin@0123
+#include <WiFiClientSecure.h>
+
+#include <Wire.h>
+
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
+#include <Wire.h>
+ 
+#include <LiquidCrystal_I2C.h>
+
+// set the LCD number of columns and rows
+int lcdColumns = 16;
+int lcdRows = 2;
+int temp=0;
+// set LCD address, number of columns and rows
+// if you don't know your display address, run an I2C scanner sketch
+LiquidCrystal_I2C lcd(0x27, lcdColumns, lcdRows);  
+// Create an object for the MPU6050 sensor
+Adafruit_MPU6050 mpu;
+
+const char *ssid = "health";
+const char *password = "123456789";
+
+// Cayenne authentication info. This should be obtained from the Cayenne Dashboard.
+unsigned int a=0,b=0,c=0,d=0,e=0,f=0;
+unsigned int A=0,VALA=1,VALB=0;
+int AVALA=0,AVALB=0,AVALC=0,AVALD=0,AVALE=0,AVALG=1,count=0;
+int Gpsdata;             // for incoming serial data
+  unsigned int finish =0;  // indicate end of message
+  unsigned int pos_cnt=0;  // position counter
+  unsigned int lat_cnt=0;  // latitude data counterij.~~
+  unsigned int log_cnt=0;  // longitude data counter
+  unsigned int flg    =0;  // GPS flag
+  unsigned int com_cnt=0;  // comma counter
+  char lat[20];            // latitude array
+  char lg[20];             // longitude array
+
+void Receive_GPS_Data();
+
+//cayenne app
+//email.id: pillboxnew@gmail.com
+//p.w: 123456789
